@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Японский для начинающих · Игра</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Hiragino Sans', 'Meiryo', sans-serif;
+        }
+        body {
+            background: linear-gradient(145deg, #2b3a4a 0%, #1d2a35 100%);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+        .game-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 48px 48px 32px 32px;
+            padding: 28px 24px 36px;
+            box-shadow: 0 25px 40px -12px rgba(0,0,0,0.6), 0 2px 10px 0 rgba(255,255,240,0.15) inset;
+            border: 1px solid rgba(255, 240, 200, 0.25);
+            max-width: 1000px;
+            width: 100%;
+        }
+        h1 {
+            text-align: center;
+            margin: 0 0 12px 0;
+            font-weight: 400;
+            font-size: 2.2rem;
+            letter-spacing: 4px;
+            color: #f5e7d9;
+            text-shadow: 2px 4px 6px #1f1a15;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+        h1 span {
+            background: #bfa98e;
+            color: #1f2a33;
+            font-size: 1.2rem;
+            padding: 6px 16px;
+            border-radius: 60px;
+            box-shadow: inset 0 -3px 0 #6e5e4b;
+            font-weight: 600;
+        }
+        .score-panel {
+            display: flex;
+            justify-content: space-between;
+            background: #2e3c48c9;
+            border-radius: 60px;
+            padding: 10px 24px;
+            margin: 8px 10px 28px 10px;
+            color: #f2e0cd;
+            border: 1px solid #b6a68b55;
+            font-size: 1.3rem;
+            font-weight: 500;
+            backdrop-filter: blur(4px);
+        }
+        .score, .attempts {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .score span, .attempts span {
+            background: #425563;
+            padding: 6px 18px;
+            border-radius: 40px;
+            color: #faead6;
+            font-weight: 700;
+            font-size: 1.8rem;
+            line-height: 1;
+            min-width: 60px;
+            text-align: center;
+        }
+        .attempts span {
+            background: #6d4f3f;
+        }
+        .game-board {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin: 25px 0 15px;
+        }
+        .column {
+            flex: 1 1 280px;
+            background: #1e2b33d9;
+            border-radius: 32px;
+            padding: 22px 16px 22px;
+            backdrop-filter: blur(6px);
+            border: 2px solid #8f9a9e36;
+            box-shadow: 0 6px 0 #0f171e;
+        }
+        .column h2 {
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 28px;
+            font-weight: 400;
+            color: #ffecd8;
+            font-size: 1.8rem;
+            border-bottom: 2px dashed #c2aa8b66;
+            padding-bottom: 12px;
+            letter-spacing: 2px;
+        }
+        .japanese-col h2 {
+            color: #ffcf9a;
+        }
+        .russian-col h2 {
+            color: #b5d0d9;
+        }
+        .card-list {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            align-items: stretch;
+        }
+        .word-card {
+            background: #fbf3e8;
+            background-image: radial-gradient(circle at 10px 20px, #ffffff90 1px, transparent 1px), 
+                              linear-gradient(145deg, #fffaf0, #f5e5d0);
+            padding: 20px 16px;
+            border-radius: 24px;
+            font-size: 1.9rem;
+            font-weight: 600;
+            text-align: center;
+            box-shadow: 0 8px 0 #8b6f54, 0 10px 18px rgba(0,0,0,0.3);
+            transition: all 0.1s ease;
+            cursor: pointer;
+            user-select: none;
+            border: 2px solid #ebcba0;
+            color: #1c2a36;
+            letter-spacing: 1px;
+            touch-action: manipulation;
+            word-break: break-word;
+        }
+        .japanese-card {
+            font-size: 2.1rem;
+            background: #fffaec;
+            background-image: linear-gradient(145deg, #fff3e0, #fee9cf);
+            border: 2px solid #dbbd96;
+            box-shadow: 0 8px 0 #946b42;
+        }
+        .russian-card {
+            font-size: 1.8rem;
+            background: #ecf3f7;
+            background-image: linear-gradient(145deg, #f0f8ff, #dee9f0);
+            border: 2px solid #a5bccc;
+            box-shadow: 0 8px 0 #5e707e;
+            color: #11212e;
+        }
+        .word-card.selected {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 0 #c2935e, 0 14px 22px black;
+            filter: brightness(1.15);
+            border: 3px solid #fdebb3;
+        }
+        .word-card.matched {
+            opacity: 0.35;
+            filter: grayscale(0.6);
+            box-shadow: 0 4px 0 #5f5f5f;
+            transform: translateY(4px);
+            pointer-events: none;
+            cursor: default;
+            background: #bdbdbd;
+            border-color: #8d8d8d;
+            transition: all 0.2s;
+        }
+        .word-card:active:not(.matched):not(.selected) {
+            transform: translateY(4px);
+            box-shadow: 0 4px 0 #7a623f;
+        }
+        .message-area {
+            text-align: center;
+            min-height: 70px;
+            font-size: 1.7rem;
+            padding: 16px 10px;
+            color: #fadbb1;
+            font-weight: 500;
+            text-shadow: 2px 2px 0 #1d2a2e;
+            letter-spacing: 1px;
+        }
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: center;
+            margin: 20px 0 10px;
+        }
+        .btn {
+            background: #e7cfb0;
+            border: none;
+            font-size: 1.4rem;
+            font-weight: 600;
+            padding: 16px 42px;
+            border-radius: 50px;
+            color: #1e2d39;
+            box-shadow: 0 7px 0 #856e50, 0 8px 16px black;
+            cursor: pointer;
+            transition: 0.05s linear;
+            letter-spacing: 1.5px;
+            border: 1px solid #ffeaca;
+            flex: 0 1 auto;
+        }
+        .btn:active {
+            transform: translateY(5px);
+            box-shadow: 0 2px 0 #705d44, 0 5px 12px black;
+        }
+        .btn.reset {
+            background: #c0cfde;
+            box-shadow: 0 7px 0 #6b7f92;
+            color: #0e222f;
+        }
+        .footer {
+            text-align: center;
+            color: #aebec9;
+            font-size: 1.1rem;
+            margin-top: 24px;
+        }
+        .footer a {
+            color: #ffd8b0;
+            text-decoration: none;
+        }
+        @media (max-width: 650px) {
+            .game-container { padding: 20px 12px; }
+            .word-card { font-size: 1.6rem; padding: 16px; }
+            .japanese-card { font-size: 1.9rem; }
+            .btn { padding: 14px 25px; font-size: 1.2rem; }
+            h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <h1>
+        にほんご <span>начальный</span>
+    </h1>
+
+    <div class="score-panel">
+        <div class="score">✅ совпадений <span id="scoreDisplay">0</span></div>
+        <div class="attempts">🔄 попытка <span id="attemptDisplay">0</span></div>
+    </div>
+
+    <div class="game-board" id="gameBoard">
+        <!-- Левая колонка (японские карточки) -->
+        <div class="column japanese-col">
+            <h2>🇯🇵 日本語</h2>
+            <div class="card-list" id="japaneseList"></div>
+        </div>
+        <!-- Правая колонка (переводы) -->
+        <div class="column russian-col">
+            <h2>🇷🇺 перевод</h2>
+            <div class="card-list" id="russianList"></div>
+        </div>
+    </div>
+
+    <div class="message-area" id="message">✧  выбери слово слева, затем перевод ✧</div>
+
+    <div class="button-group">
+        <button class="btn" id="newGameBtn">🔄 Новая игра</button>
+        <button class="btn reset" id="resetCurrentBtn">⟲ Сбросить пары</button>
+    </div>
+    <div class="footer">
+        ⛩️  учим хирагану и первые слова · <a href="#" id="shuffleHint">перемешать</a>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ----- СЛОВАРЬ (японский -> русский, начальный уровень) -----
+        const PAIRS = [
+            { ja: 'いぬ', ru: 'собака' },
+            { ja: 'ねこ', ru: 'кошка' },
+            { ja: 'とり', ru: 'птица' },
+            { ja: 'さかな', ru: 'рыба' },
+            { ja: 'き', ru: 'дерево' },
+            { ja: 'みず', ru: 'вода' },
+            { ja: 'ひ', ru: 'огонь' },
+            { ja: 'やま', ru: 'гора' },
+            { ja: 'はな', ru: 'цветок' },
+            { ja: 'あめ', ru: 'дождь' }
+        ];
+
+        // ----- Состояние игры -----
+        let japaneseItems = [];          // массив объектов { id, text, pairId, matched }
+        let russianItems = [];           // массив объектов { id, text, pairId, matched }
+        let selectedId = null;           // ID выбранной японской карточки (или null)
+        let selectedElement = null;      // ссылка на DOM элемент выбранной карточки (для подсветки)
+        let matchCount = 0;              // сколько пар собрано
+        let attemptCount = 0;             // счётчик попыток (неудачных + успешных)
+        let gameFinished = false;
+
+        // уникальные id для карточек (простые счётчики)
+        let nextJapaneseId = 1;
+        let nextRussianId = 1000;
+
+        // DOM элементы
+        const japaneseListEl = document.getElementById('japaneseList');
+        const russianListEl = document.getElementById('russianList');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const attemptDisplay = document.getElementById('attemptDisplay');
+        const messageEl = document.getElementById('message');
+        const newGameBtn = document.getElementById('newGameBtn');
+        const resetCurrentBtn = document.getElementById('resetCurrentBtn');
+        const shuffleHint = document.getElementById('shuffleHint');
+
+        // вспомогательная функция перемешивания Фишера-Йетса
+        function shuffleArray(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        // инициализация / перезагрузка данных
+        function initGameData() {
+            // создать пары с pairId от 0 до N-1
+            const pairsCount = PAIRS.length;
+
+            // японские карточки
+            japaneseItems = PAIRS.map((pair, index) => ({
+                id: nextJapaneseId++,
+                text: pair.ja,
+                pairId: index,
+                matched: false
+            }));
+
+            // русские карточки
+            russianItems = PAIRS.map((pair, index) => ({
+                id: nextRussianId++,
+                text: pair.ru,
+                pairId: index,
+                matched: false
+            }));
+
+            // перемешиваем обе колоды независимо
+            japaneseItems = shuffleArray(japaneseItems);
+            russianItems = shuffleArray(russianItems);
+
+            matchCount = 0;
+            attemptCount = 0;
+            gameFinished = false;
+            clearSelected();
+        }
+
+        // Сброс только matched флагов (перемешать карточки, снять matched, сохранить порядок)
+        function resetMatchedOnly() {
+            // сбросить matched у всех
+            japaneseItems.forEach(item => item.matched = false);
+            russianItems.forEach(item => item.matched = false);
+            // независимо перемешать каждый массив (чтобы позиции изменились)
+            japaneseItems = shuffleArray(japaneseItems);
+            russianItems = shuffleArray(russianItems);
+            matchCount = 0;
+            gameFinished = false;
+            clearSelected();
+        }
+
+        // полностью новая игра (новая генерация)
+        function resetFullGame() {
+            initGameData();
+            renderBoard();
+            updateMessage('Новая колода! Удачи がんばって');
+        }
+
+        // снять выделение
+        function clearSelected() {
+            if (selectedElement) {
+                selectedElement.classList.remove('selected');
+                selectedElement = null;
+            }
+            selectedId = null;
+        }
+
+        // обновить счётчики
+        function updateCounters() {
+            scoreDisplay.textContent = matchCount;
+            attemptDisplay.textContent = attemptCount;
+            if (matchCount === PAIRS.length) {
+                gameFinished = true;
+                messageEl.textContent = '🎉  Поздравляю! Ты собрал все пары!  🎉';
+            }
+        }
+
+        // установить сообщение (если игра не закончена)
+        function updateMessage(text) {
+            if (!gameFinished || matchCount === PAIRS.length) {
+                messageEl.textContent = text;
+            }
+        }
+
+        // обработка клика на японскую карточку
+        function handleJapaneseClick(cardId) {
+            if (gameFinished) {
+                updateMessage('Игра завершена! Начни новую или сбрось пары.');
+                return;
+            }
+
+            const card = japaneseItems.find(c => c.id === cardId);
+            if (!card || card.matched) return; // недоступно
+
+            const cardElement = document.querySelector(`.japanese-card[data-id="${cardId}"]`);
+            if (!cardElement) return;
+
+            // если та же самая карточка уже выбрана — снимаем выделение
+            if (selectedId === cardId) {
+                clearSelected();
+                updateMessage('выбор снят');
+                return;
+            }
+
+            // снимаем предыдущее выделение, если было
+            if (selectedElement) {
+                selectedElement.classList.remove('selected');
+            }
+
+            // устанавливаем новое выделение
+            selectedId = cardId;
+            selectedElement = cardElement;
+            selectedElement.classList.add('selected');
+            updateMessage(`выбрано: ${card.text} → ищи перевод`);
+        }
+
+        // обработка клика на русскую карточку
+        function handleRussianClick(cardId) {
+            if (gameFinished) {
+                updateMessage('Игра окончена. Жми "Новая игра"');
+                return;
+            }
+
+            const russianCard = russianItems.find(c => c.id === cardId);
+            if (!russianCard || russianCard.matched) return;
+
+            // если нет выбранной японской карточки
+            if (selectedId === null) {
+                updateMessage('✋ сначала выбери японское слово');
+                return;
+            }
+
+            // ищем японскую карточку по selectedId
+            const japaneseCard = japaneseItems.find(c => c.id === selectedId);
+            if (!japaneseCard || japaneseCard.matched) {
+                // такое возможно в редких гонках? сбросим выделение
+                clearSelected();
+                updateMessage('что‑то пошло не так, выбери заново');
+                renderBoard(); // перерендер для чистоты
+                return;
+            }
+
+            // проверка: совпадают ли pairId
+            const isMatch = (japaneseCard.pairId === russianCard.pairId);
+
+            // увеличиваем счётчик попыток (любая пара японский -> русский)
+            attemptCount++;
+            attemptDisplay.textContent = attemptCount;
+
+            if (isMatch) {
+                // успех: помечаем обе карточки matched
+                japaneseCard.matched = true;
+                russianCard.matched = true;
+                matchCount++;
+                scoreDisplay.textContent = matchCount;
+
+                // снять выделение, так как пара собрана
+                clearSelected();
+
+                // сообщение
+                if (matchCount === PAIRS.length) {
+                    updateMessage('⭐  Блестяще! Ты выучил все слова!  ⭐');
+                } else {
+                    updateMessage('✅  верно! молодец!');
+                }
+
+                // перерисовать (карточки станут неактивными)
+                renderBoard();
+            } else {
+                // неудача: просто снять выделение, карточки остаются
+                clearSelected();
+                updateMessage('❌  не совпадает, попробуй другое слово');
+                // перерисовка не нужна, просто убрали выделение, но можно обновить доску чтоб снять визуально
+                renderBoard(); // перерендер сбросит возможные старые выделения, но selected уже null
+            }
+        }
+
+        // отрисовка всей доски на основе japaneseItems / russianItems
+        function renderBoard() {
+            // очищаем контейнеры
+            japaneseListEl.innerHTML = '';
+            russianListEl.innerHTML = '';
+
+            // отрисовка японских карточек
+            japaneseItems.forEach(item => {
+                const card = document.createElement('div');
+                card.className = `word-card japanese-card ${item.matched ? 'matched' : ''}`;
+                card.setAttribute('data-id', item.id);
+                card.textContent = item.text;
+                if (!item.matched) {
+                    card.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        handleJapaneseClick(item.id);
+                    });
+                }
+                japaneseListEl.appendChild(card);
+            });
+
+            // отрисовка русских карточек
+            russianItems.forEach(item => {
+                const card = document.createElement('div');
+                card.className = `word-card russian-card ${item.matched ? 'matched' : ''}`;
+                card.setAttribute('data-id', item.id);
+                card.textContent = item.text;
+                if (!item.matched) {
+                    card.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        handleRussianClick(item.id);
+                    });
+                }
+                russianListEl.appendChild(card);
+            });
+
+            // если есть выбранный ID, но элемент вдруг не найден или матчинг — сбросим выделение в целостности
+            if (selectedId) {
+                const stillExists = japaneseItems.some(c => c.id === selectedId && !c.matched);
+                if (!stillExists) {
+                    clearSelected();
+                } else {
+                    // восстановить подсветку (например после перерисовки)
+                    const newSelectedEl = document.querySelector(`.japanese-card[data-id="${selectedId}"]`);
+                    if (newSelectedEl && !newSelectedEl.classList.contains('matched')) {
+                        if (selectedElement) selectedElement.classList.remove('selected');
+                        selectedElement = newSelectedEl;
+                        selectedElement.classList.add('selected');
+                    } else {
+                        clearSelected(); // если matched, сброс
+                    }
+                }
+            }
+
+            // обновим счётчики и текст
+            updateCounters();
+            if (matchCount === PAIRS.length) {
+                messageEl.textContent = '🎉  Кампания завершена! Отличная работа!  🎉';
+            }
+        }
+
+        // --- Обработчики кнопок ---
+        newGameBtn.addEventListener('click', () => {
+            resetFullGame();
+        });
+
+        resetCurrentBtn.addEventListener('click', () => {
+            if (japaneseItems.length === 0) {
+                resetFullGame();
+                return;
+            }
+            resetMatchedOnly();
+            renderBoard();
+            updateMessage('перемешано! попробуй снова');
+        });
+
+        shuffleHint.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (gameFinished && matchCount === PAIRS.length) {
+                resetFullGame();
+            } else {
+                resetMatchedOnly();
+                renderBoard();
+                updateMessage('колода перемешана');
+            }
+        });
+
+        // Старт игры при загрузке
+        initGameData();
+        renderBoard();
+        updateMessage('✧  выбери слово слева, затем перевод ✧');
+    })();
+</script>
+</body>
+</html>
