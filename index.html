@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Японский алфавит: Хирагана (игра для изучения)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
+        }
+        body {
+            background: linear-gradient(145deg, #1e2b3c 0%, #0f1a26 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 16px;
+        }
+        .game-card {
+            max-width: 800px;
+            width: 100%;
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 48px;
+            padding: 32px 24px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8), inset 0 1px 2px rgba(255,255,255,0.1);
+            color: #f0f3fa;
+        }
+        h1 {
+            font-size: 2.6rem;
+            font-weight: 400;
+            letter-spacing: 4px;
+            text-align: center;
+            margin: 0 0 8px 0;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.6);
+            font-family: 'Yu Mincho', 'Sawarabi Mincho', serif;
+        }
+        .subtitle {
+            text-align: center;
+            font-size: 1rem;
+            opacity: 0.8;
+            margin-bottom: 32px;
+            border-bottom: 1px dashed rgba(255,255,240,0.3);
+            padding-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .question-area {
+            background: rgba(10, 20, 30, 0.7);
+            border-radius: 60px;
+            padding: 32px 24px;
+            margin-bottom: 36px;
+            border: 1px solid #4e6b7c;
+            box-shadow: inset 0 0 15px #0b141e, 0 12px 24px -8px black;
+        }
+        .character {
+            font-size: 9rem;
+            line-height: 1.2;
+            text-align: center;
+            font-weight: 400;
+            margin: 10px 0;
+            text-shadow: 0 0 20px #9ec7e0;
+            letter-spacing: 8px;
+            font-family: 'Noto Sans JP', 'Klee One', 'Sawarabi Mincho', serif;
+        }
+        .romaji-hint {
+            font-size: 2rem;
+            text-align: center;
+            color: #c0e0ff;
+            font-weight: 300;
+            background: rgba(0,0,0,0.3);
+            border-radius: 60px;
+            padding: 8px 20px;
+            display: inline-block;
+            margin: 0 auto;
+            width: auto;
+            border: 1px solid #3b5e7a;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 4px 6px #00000033;
+        }
+        .hint-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 8px;
+        }
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            background: #101f2b;
+            border-radius: 40px;
+            padding: 12px 24px;
+            margin: 28px 0 24px;
+            border: 1px solid #2c485b;
+            font-size: 1.4rem;
+            font-weight: 500;
+            backdrop-filter: blur(4px);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .stat-badge {
+            background: #263f50;
+            border-radius: 30px;
+            padding: 6px 16px;
+            color: #d3ecff;
+            font-weight: 600;
+        }
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+            margin: 32px 0 20px;
+        }
+        .option-btn {
+            background: rgba(20, 40, 55, 0.8);
+            border: 2px solid #2f556b;
+            color: white;
+            font-size: 2rem;
+            padding: 24px 12px;
+            border-radius: 48px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 500;
+            letter-spacing: 2px;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 10px 12px -6px black;
+            font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
+        }
+        .option-btn:hover:not(:disabled) {
+            background: #1d4968;
+            border-color: #7ab3d0;
+            transform: scale(1.02);
+            box-shadow: 0 0 20px #3f9fd9;
+        }
+        .option-btn.correct:disabled {
+            background: #1d6b4c;
+            border-color: #7fe0b2;
+            color: #e6fff2;
+            box-shadow: 0 0 18px #30c48b;
+        }
+        .option-btn.wrong:disabled {
+            background: #712e3c;
+            border-color: #d66b7a;
+            color: #ffd6db;
+            opacity: 0.9;
+        }
+        .option-btn:disabled {
+            opacity: 0.8;
+            cursor: not-allowed;
+            filter: grayscale(0.2);
+        }
+        .feedback {
+            min-height: 60px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background: #0d1d29;
+            border-radius: 40px;
+            margin: 20px 0 16px;
+            padding: 12px 20px;
+            border-left: 6px solid #2e6a8b;
+            color: #d0e9ff;
+        }
+        .next-btn {
+            background: linear-gradient(145deg, #316d8a, #18445a);
+            border: none;
+            color: white;
+            font-size: 1.8rem;
+            padding: 22px 32px;
+            border-radius: 60px;
+            font-weight: 600;
+            letter-spacing: 3px;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.2s;
+            border: 1px solid #4797bf;
+            box-shadow: 0 12px 20px -10px #0a141c;
+            text-transform: uppercase;
+        }
+        .next-btn:hover:not(:disabled) {
+            background: #3f82a8;
+            box-shadow: 0 0 25px #459fd9;
+            border-color: #96d0f0;
+        }
+        .next-btn:disabled {
+            opacity: 0.3;
+            cursor: default;
+        }
+        .restart-btn {
+            background: transparent;
+            border: 1px solid #617e94;
+            color: #b3d6f0;
+            padding: 14px 28px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 20px;
+            width: auto;
+            backdrop-filter: blur(8px);
+        }
+        .restart-btn:hover {
+            background: #203e52;
+            border-color: #aad0f0;
+        }
+        .footer {
+            display: flex;
+            justify-content: center;
+        }
+        @media (max-width: 500px) {
+            .options-grid { grid-template-columns: 1fr; }
+            .character { font-size: 6rem; }
+            .option-btn { font-size: 1.8rem; padding: 18px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-card" role="main">
+        <h1>あ · か · さ</h1>
+        <div class="subtitle">выбери правильное произношение</div>
+
+        <!-- Блок вопроса: иероглиф + ромаджи (подсказка для изучающих) -->
+        <div class="question-area">
+            <div class="character" id="kanjiDisplay">あ</div>
+            <div class="hint-container">
+                <div class="romaji-hint" id="romajiHint">a</div>
+            </div>
+        </div>
+
+        <!-- Статистика: правильно / всего / точность -->
+        <div class="stats-row">
+            <span class="stat-item">✅ <span class="stat-badge" id="correctCounter">0</span></span>
+            <span class="stat-item">📋 <span class="stat-badge" id="totalCounter">0</span></span>
+            <span class="stat-item">🎯 <span class="stat-badge" id="accuracyDisplay">0%</span></span>
+        </div>
+
+        <!-- Кнопки вариантов ответа (ромадзи) -->
+        <div class="options-grid" id="optionsContainer">
+            <button class="option-btn" id="opt0">a</button>
+            <button class="option-btn" id="opt1">i</button>
+            <button class="option-btn" id="opt2">u</button>
+            <button class="option-btn" id="opt3">e</button>
+        </div>
+
+        <!-- Фидбек после ответа -->
+        <div class="feedback" id="feedbackMessage">
+            ✨ нажми на вариант
+        </div>
+
+        <!-- Кнопка "Следующий символ" -->
+        <button class="next-btn" id="nextBtn" disabled>➡ следующий</button>
+
+        <!-- Кнопка сброса (перезапуск) -->
+        <div class="footer">
+            <button class="restart-btn" id="restartBtn">🔄 начать заново</button>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ----- СЛОВАРЬ ХИРАГАНЫ (символ → ромадзи) -----
+            const hiraganaSet = [
+                { char: 'あ', romaji: 'a' },
+                { char: 'い', romaji: 'i' },
+                { char: 'う', romaji: 'u' },
+                { char: 'え', romaji: 'e' },
+                { char: 'お', romaji: 'o' },
+                { char: 'か', romaji: 'ka' },
+                { char: 'き', romaji: 'ki' },
+                { char: 'く', romaji: 'ku' },
+                { char: 'け', romaji: 'ke' },
+                { char: 'こ', romaji: 'ko' },
+                { char: 'さ', romaji: 'sa' },
+                { char: 'し', romaji: 'shi' },
+                { char: 'す', romaji: 'su' },
+                { char: 'せ', romaji: 'se' },
+                { char: 'そ', romaji: 'so' },
+                { char: 'た', romaji: 'ta' },
+                { char: 'ち', romaji: 'chi' },
+                { char: 'つ', romaji: 'tsu' },
+                { char: 'て', romaji: 'te' },
+                { char: 'と', romaji: 'to' },
+                { char: 'な', romaji: 'na' },
+                { char: 'に', romaji: 'ni' },
+                { char: 'ぬ', romaji: 'nu' },
+                { char: 'ね', romaji: 'ne' },
+                { char: 'の', romaji: 'no' },
+                { char: 'は', romaji: 'ha' },
+                { char: 'ひ', romaji: 'hi' },
+                { char: 'ふ', romaji: 'fu' },
+                { char: 'へ', romaji: 'he' },
+                { char: 'ほ', romaji: 'ho' },
+                { char: 'ま', romaji: 'ma' },
+                { char: 'み', romaji: 'mi' },
+                { char: 'む', romaji: 'mu' },
+                { char: 'め', romaji: 'me' },
+                { char: 'も', romaji: 'mo' },
+                { char: 'や', romaji: 'ya' },
+                { char: 'ゆ', romaji: 'yu' },
+                { char: 'よ', romaji: 'yo' },
+                { char: 'ら', romaji: 'ra' },
+                { char: 'り', romaji: 'ri' },
+                { char: 'る', romaji: 'ru' },
+                { char: 'れ', romaji: 're' },
+                { char: 'ろ', romaji: 'ro' },
+                { char: 'わ', romaji: 'wa' },
+                { char: 'を', romaji: 'wo' },
+                { char: 'ん', romaji: 'n' }
+            ];
+
+            // --- Игровое состояние ---
+            let currentItem = null;                // текущий объект {char, romaji}
+            let currentOptions = [];                // массив строк ромадзи (4 шт)
+            let correctRomaji = '';
+            let answered = false;                   // был ли уже дан ответ на текущий вопрос
+            let correctCount = 0;
+            let totalAttempted = 0;                  // количество отвеченных вопросов (когда ответили правильно или нет)
+            let currentCharDisplay = document.getElementById('kanjiDisplay');
+            let romajiHintSpan = document.getElementById('romajiHint');
+            let optBtns = [
+                document.getElementById('opt0'),
+                document.getElementById('opt1'),
+                document.getElementById('opt2'),
+                document.getElementById('opt3')
+            ];
+            let feedbackEl = document.getElementById('feedbackMessage');
+            let nextBtn = document.getElementById('nextBtn');
+            let restartBtn = document.getElementById('restartBtn');
+            let correctSpan = document.getElementById('correctCounter');
+            let totalSpan = document.getElementById('totalCounter');
+            let accuracySpan = document.getElementById('accuracyDisplay');
+
+            // --- Функция обновления статистики ---
+            function updateStats() {
+                correctSpan.textContent = correctCount;
+                totalSpan.textContent = totalAttempted;
+                let accuracy = totalAttempted === 0 ? 0 : Math.round((correctCount / totalAttempted) * 100);
+                accuracySpan.textContent = accuracy + '%';
+            }
+
+            // --- Получить случайный элемент из hiraganaSet ---
+            function getRandomHiraganaItem() {
+                const randomIndex = Math.floor(Math.random() * hiraganaSet.length);
+                return { ...hiraganaSet[randomIndex] }; // копия
+            }
+
+            // --- Генерация 3 случайных неправильных (но уникальных и не равных правильному) ---
+            function generateWrongOptions(correctRomaji, count = 3) {
+                let wrongs = new Set();
+                // получаем список всех возможных ромадзи (уникальных)
+                const allRomajiList = hiraganaSet.map(item => item.romaji);
+                // Фильтруем, чтобы не включать правильный вариант
+                const possibleWrongs = allRomajiList.filter(r => r !== correctRomaji);
+                while (wrongs.size < count && wrongs.size < possibleWrongs.length) {
+                    const randomIndex = Math.floor(Math.random() * possibleWrongs.length);
+                    wrongs.add(possibleWrongs[randomIndex]);
+                }
+                // если вдруг недостаточно уникальных неверных (маловероятно, но бывает при малом наборе)
+                // просто добавим заполнители
+                while (wrongs.size < count) {
+                    wrongs.add('?');
+                }
+                return Array.from(wrongs);
+            }
+
+            // --- Перемешать массив (алгоритм Фишера-Йетса) ---
+            function shuffleArray(arr) {
+                for (let i = arr.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [arr[i], arr[j]] = [arr[j], arr[i]];
+                }
+                return arr;
+            }
+
+            // --- Обновление вопроса: выбираем символ, опции, обновляем UI ---
+            function loadNewQuestion() {
+                // Выбираем случайную хирагану
+                currentItem = getRandomHiraganaItem();
+                correctRomaji = currentItem.romaji;
+
+                // Генерируем 3 неправильных ответа
+                let wrongOptions = generateWrongOptions(correctRomaji, 3);
+
+                // Создаём массив из правильного + неправильных
+                currentOptions = [correctRomaji, ...wrongOptions];
+
+                // Перемешиваем, чтобы правильный был не всегда первым
+                currentOptions = shuffleArray(currentOptions);
+
+                // Отображаем символ хираганы
+                currentCharDisplay.textContent = currentItem.char;
+                // Показываем подсказку romaji мелко (для помощи, если игрок забыл)
+                romajiHintSpan.textContent = correctRomaji;   // открытая подсказка (можно скрыть, но пусть будет для обучения)
+
+                // Обновляем текст кнопок
+                for (let i = 0; i < optBtns.length; i++) {
+                    optBtns[i].textContent = currentOptions[i];
+                }
+
+                // Сбрасываем стили и состояние кнопок
+                for (let btn of optBtns) {
+                    btn.disabled = false;
+                    btn.classList.remove('correct', 'wrong');
+                }
+
+                // Сбрасываем feedback
+                feedbackEl.innerHTML = '🤔 выбери перевод';
+                // Делаем кнопку next неактивной, пока не ответят
+                nextBtn.disabled = true;
+                answered = false;
+
+                // Дополнительно: убираем возможные остатки подсветки
+            }
+
+            // --- Обработка ответа игрока ---
+            function handleOptionClick(btnIndex) {
+                if (answered) return; // если уже ответили, блокируем повторное нажатие
+
+                const selectedRomaji = currentOptions[btnIndex];
+                const isCorrect = (selectedRomaji === correctRomaji);
+
+                // Блокируем все кнопки
+                for (let btn of optBtns) {
+                    btn.disabled = true;
+                }
+
+                // Подсвечиваем правильную и неправильные кнопки
+                for (let i = 0; i < optBtns.length; i++) {
+                    const btnRomaji = currentOptions[i];
+                    if (btnRomaji === correctRomaji) {
+                        optBtns[i].classList.add('correct');
+                    } else {
+                        // если эта кнопка была нажата и она неправильная — подсветим как wrong
+                        if (i === btnIndex && !isCorrect) {
+                            optBtns[i].classList.add('wrong');
+                        } else {
+                            // остальные просто могут быть нейтральными, но disabled
+                        }
+                    }
+                }
+
+                // Дополнительно: если нажали правильный, то она уже подсветилась как correct, а если нет, то
+                // мы добавили wrong к нажатой. Также если нажали правильный, то лишнего wrong не будет.
+                // Но нужно ещё подсветить нажатую кнопку, если она неправильная (уже сделано).
+                // Также если ответ неправильный, но мы хотим показать что выбранный вариант неверен — кнопка получает класс wrong.
+
+                // Увеличиваем счётчик попыток
+                totalAttempted++;
+                if (isCorrect) {
+                    correctCount++;
+                    feedbackEl.innerHTML = '✅ Правильно! Молодец!';
+                } else {
+                    feedbackEl.innerHTML = `❌ Неверно. Правильный: ${correctRomaji}`;
+                }
+
+                // Помечаем что ответ получен
+                answered = true;
+
+                // Активируем кнопку следующего вопроса
+                nextBtn.disabled = false;
+
+                // Обновляем статистику
+                updateStats();
+            }
+
+            // --- Привязываем обработчики к кнопкам вариантов ---
+            for (let i = 0; i < optBtns.length; i++) {
+                optBtns[i].addEventListener('click', (event) => {
+                    event.preventDefault();
+                    handleOptionClick(i);
+                });
+            }
+
+            // --- Кнопка "Следующий" ---
+            nextBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (!nextBtn.disabled) {
+                    loadNewQuestion();
+                }
+            });
+
+            // --- Кнопка "Начать заново" (сброс статистики и новый вопрос) ---
+            restartBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                // Сброс статистики
+                correctCount = 0;
+                totalAttempted = 0;
+                updateStats();
+                // Загружаем новый вопрос, сбрасываем состояние
+                loadNewQuestion();
+                // feedback заменяется через loadNewQuestion
+            });
+
+            // --- Инициализация: первый вопрос ---
+            loadNewQuestion();
+            updateStats();
+
+            // --- Дополнительно: удобство — нажатие на "enter" на кнопке? не требуется.
+        })();
+    </script>
+</body>
+</html>
